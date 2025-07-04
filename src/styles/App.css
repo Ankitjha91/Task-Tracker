@@ -2,8 +2,8 @@
 :root {
   --bg-light: #ffffff;
   --bg-dark: #121212;
-  --text-light: #222222;
-  --text-dark: #ffffff;
+  --text-light: #000000;
+  --text-dark: #003cff;
   --primary: #4caf50;
   --primary-hover: #45a049;
   --gradient-login: linear-gradient(135deg, #8e2de2, #4a00e0);
