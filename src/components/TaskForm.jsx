@@ -10,20 +10,23 @@ const TaskForm = ({ addTask, editingTask, updateTask }) => {
   useEffect(() => {
     if (editingTask) {
       setTitle(editingTask.title)
-      setDescription(editingTask.description)
+      setDescription(editingTask.description || '')
       setPriority(editingTask.priority || 'low')
       setDueDate(editingTask.dueDate || '')
     } else {
-      setTitle('')
-      setDescription('')
-      setPriority('low')
-      setDueDate('')
+      resetForm()
     }
   }, [editingTask])
 
+  const resetForm = () => {
+    setTitle('')
+    setDescription('')
+    setPriority('low')
+    setDueDate('')
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-
     if (title.trim() === '') {
       alert('Task title is required')
       return
@@ -31,10 +34,10 @@ const TaskForm = ({ addTask, editingTask, updateTask }) => {
 
     const newTask = {
       ...editingTask,
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       priority,
-      dueDate
+      dueDate,
     }
 
     if (editingTask) {
@@ -43,42 +46,61 @@ const TaskForm = ({ addTask, editingTask, updateTask }) => {
       addTask(newTask)
     }
 
-    setTitle('')
-    setDescription('')
-    setPriority('low')
-    setDueDate('')
+    resetForm()
   }
 
   return (
     <form className="task-form" onSubmit={handleSubmit}>
-      <h3>{editingTask ? 'Edit Task' : 'Add New Task'}</h3>
+      <h3>{editingTask ? '✏️ Edit Task' : '➕ Add New Task'}</h3>
 
-      <input
-        type="text"
-        placeholder="Task Title *"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div>
+        <label htmlFor="title">Task Title *</label>
+        <input
+          id="title"
+          type="text"
+          placeholder="Enter task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </div>
 
-      <textarea
-        placeholder="Description (optional)"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+      <div>
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          placeholder="Optional description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
 
-      <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-        <option value="low">Low Priority</option>
-        <option value="medium">Medium Priority</option>
-        <option value="high">High Priority</option>
-      </select>
+      <div>
+        <label htmlFor="priority">Priority</label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+        >
+          <option value="low">🟢 Low</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+      </div>
 
-      <input
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-      />
+      <div>
+        <label htmlFor="dueDate">Due Date</label>
+        <input
+          id="dueDate"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+        />
+      </div>
 
-      <button type="submit">{editingTask ? 'Update' : 'Add'} Task</button>
+      <button type="submit">
+        {editingTask ? '✅ Update Task' : '➕ Add Task'}
+      </button>
     </form>
   )
 }

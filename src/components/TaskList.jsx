@@ -1,10 +1,11 @@
 // src/components/TaskList.jsx
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import TaskForm from './TaskForm'
 import TaskItem from './TaskItem'
 import TaskFilter from './TaskFilter'
 import { loadTasks, saveTasks } from '../utils/localStorage'
-import { useNavigate } from 'react-router-dom'
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([])
@@ -14,6 +15,7 @@ const TaskList = () => {
 
   const navigate = useNavigate()
 
+  // === Load tasks & check login ===
   useEffect(() => {
     const username = localStorage.getItem('username')
     if (!username) navigate('/')
@@ -21,69 +23,96 @@ const TaskList = () => {
     setTasks(savedTasks)
   }, [])
 
+  // === Save tasks to localStorage ===
   useEffect(() => {
     saveTasks(tasks)
   }, [tasks])
 
+  // === Add new task ===
   const addTask = (task) => {
-    setTasks(prev => [...prev, { ...task, id: Date.now(), createdAt: new Date().toISOString(), completed: false }])
+    const newTask = {
+      ...task,
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+      completed: false,
+    }
+    setTasks((prev) => [...prev, newTask])
   }
 
+  // === Delete task ===
   const deleteTask = (id) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
-      setTasks(prev => prev.filter(task => task.id !== id))
+      setTasks((prev) => prev.filter((task) => task.id !== id))
     }
   }
 
+  // === Toggle completion ===
   const toggleTask = (id) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task
       )
     )
   }
 
+  // === Update task ===
   const updateTask = (updatedTask) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === updatedTask.id ? updatedTask : task
       )
     )
     setEditingTask(null)
   }
 
-  const filteredTasks = tasks.filter(task => {
+  // === Filtered & searched tasks ===
+  const filteredTasks = tasks.filter((task) => {
     if (filter === 'completed') return task.completed
     if (filter === 'pending') return !task.completed
     return true
   })
 
-  const visibleTasks = filteredTasks.filter(task =>
+  const visibleTasks = filteredTasks.filter((task) =>
     task.title.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
-    <div className="dashboard">
+    <main className="dashboard">
       <h2>Welcome, {localStorage.getItem('username')} 👋</h2>
 
-      <TaskForm addTask={addTask} editingTask={editingTask} updateTask={updateTask} />
+      <TaskForm
+        addTask={addTask}
+        editingTask={editingTask}
+        updateTask={updateTask}
+      />
 
-      {/* 🔍 Search input */}
+      {/* 🔍 Search Input */}
       <input
         type="text"
         placeholder="🔍 Search tasks by title..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ padding: '0.5rem', width: '100%', marginBottom: '1rem', borderRadius: '6px', border: '1px solid #ccc' }}
+        aria-label="Search tasks by title"
+        style={{
+          padding: '0.6rem',
+          width: '100%',
+          margin: '1rem 0',
+          borderRadius: '6px',
+          border: '1px solid #ccc',
+        }}
       />
 
       <TaskFilter filter={filter} setFilter={setFilter} tasks={tasks} />
 
       <div className="task-list">
         {visibleTasks.length === 0 ? (
-          <p>No tasks found.</p>
+          <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>
+            {tasks.length === 0
+              ? 'No tasks added yet. Start by adding one!'
+              : 'No tasks match your search.'}
+          </p>
         ) : (
-          visibleTasks.map(task => (
+          visibleTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}
@@ -94,7 +123,7 @@ const TaskList = () => {
           ))
         )}
       </div>
-    </div>
+    </main>
   )
 }
 
